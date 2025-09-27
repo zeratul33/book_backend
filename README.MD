@@ -131,6 +131,28 @@ http://localhost:8070/admin
 账号 superAdmin 密码 admin123
 ```
 
+## 生成代码步骤
+
+1. 新建sql
+2. 填写hack/config.yaml和manifast/config/config.yaml里面的数据库信息，该步骤若在启动时已做了，就可以跳过
+3. 新建模块，命令可以再go run main.go help查看
+```
+go run main.go module:create -name 模块名称
+```
+4. 登录后台，在工具，代码生成器里面填写相关信息
+5. 生成代码，解压，把模块名字的文件夹复制到modules下，vue的文件下下面会有api和views两个文件夹，复制到web/admin/src下,然后执行sql文件夹里面以up.sql为结尾的sql脚本
+6. 生成dao和service，在hack/hack.mk里面的service命令里面，新增如下语句
+```
+@gf gen service -s=modules/novel_mall/logic -d=modules/novel_mall/service
+```
+- 然后再终端执行
+```shell
+make dao
+make service
+```
+
+7. 在modules下模块文件夹下，module.go文件里面，分组路由里面添加controller里面的控制器
+8. 重启后端
 ## 交流社区
 
 - QQ群：483122520

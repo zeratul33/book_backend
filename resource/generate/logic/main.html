@@ -258,6 +258,7 @@ func (s *s{% .tableCaseCamelName %}) Save(ctx context.Context, in *req.{% .table
     }
 
     // 检查Level字段是否已存在且有值
+    {% if eq .table.Type "tree"  %}
     needCalculateLevel := utils.HasField(saveData, "Level")
     // 只有在Level字段不存在或为空时才自动计算
     if needCalculateLevel {
@@ -276,6 +277,7 @@ func (s *s{% .tableCaseCamelName %}) Save(ctx context.Context, in *req.{% .table
         }
         saveData.Level = level
     }
+    {% end %}
 
     rs, err := s.Model(ctx).OmitNilData().Data(saveData).Insert()
     if utils.IsError(err) {
@@ -306,7 +308,7 @@ func (s *s{% .tableCaseCamelName %}) Update(ctx context.Context, in *req.{% .tab
     if err = gconv.Struct(in, &updateData); err != nil {
         return
     }
-    needCalculateLevel := utils.HasField(updateData, "Level")
+
     var {% .tableCaseCamelLowerName %}Item *entity.{% .tableCaseCamelName %}
     err = s.Model(ctx).Where("id", in.Id).Scan(&{% .tableCaseCamelLowerName %}Item)
     if utils.IsError(err) {
@@ -318,6 +320,8 @@ func (s *s{% .tableCaseCamelName %}) Update(ctx context.Context, in *req.{% .tab
         return
     }
 
+    {% if eq .table.Type "tree"  %}
+    needCalculateLevel := utils.HasField(updateData, "Level")
     if needCalculateLevel {
         var level string
         if in.ParentId == 0 {
@@ -334,11 +338,13 @@ func (s *s{% .tableCaseCamelName %}) Update(ctx context.Context, in *req.{% .tab
         }
         updateData.Level = level
     }
+    {% end %}
     _, err = s.Model(ctx).OmitNilData().Data(updateData).Where("id", in.Id).Update()
 
     if utils.IsError(err) {
         return
     }
+    {% if eq .table.Type "tree"  %}
     if needCalculateLevel {
         childLevelPrefix := fmt.Sprintf("%s%d,", {% .tableCaseCamelLowerName %}Item.Level, in.Id)
         var itemList []*entity.{% .tableCaseCamelName %}
@@ -359,6 +365,7 @@ func (s *s{% .tableCaseCamelName %}) Update(ctx context.Context, in *req.{% .tab
             }
         }
     }
+    {% end %}
 
     return
 }
@@ -367,9 +374,10 @@ func (s *s{% .tableCaseCamelName %}) Update(ctx context.Context, in *req.{% .tab
 {% if contains .generateMenus "delete"  %}
 func (s *s{% .tableCaseCamelName %}) Delete(ctx context.Context, ids []{% getModelColumnTypeFromColumName .columns "id" %}) (err error) {
     // 检查是否需要处理Level字段
+
+    {% if eq .table.Type "tree"  %}
     doObj := do.{% .tableCaseCamelName %}{}
     needCalculateLevel := utils.HasField(doObj, "Level")
-
     if needCalculateLevel {
             // 为每个要删除的ID处理其子分类
          for _, id := range ids {
@@ -389,8 +397,10 @@ func (s *s{% .tableCaseCamelName %}) Delete(ctx context.Context, ids []{% getMod
                     return err
                 }
             }
+
          }
     }
+    {% end %}
 
     // 删除指定的记录
     _, err = s.Model(ctx).WhereIn("id", ids).Delete()
@@ -402,9 +412,11 @@ func (s *s{% .tableCaseCamelName %}) Delete(ctx context.Context, ids []{% getMod
 
 func (s *s{% .tableCaseCamelName %}) RealDelete(ctx context.Context, ids []{% getModelColumnTypeFromColumName .columns "id" %}) (err error) {
     // 检查是否需要处理Level字段
+
+
+    {% if eq .table.Type "tree"  %}
     doObj := do.{% .tableCaseCamelName %}{}
     needCalculateLevel := utils.HasField(doObj, "Level")
-
     if needCalculateLevel {
         // 为每个要删除的ID处理其子分类
         for _, id := range ids {
@@ -426,6 +438,7 @@ func (s *s{% .tableCaseCamelName %}) RealDelete(ctx context.Context, ids []{% ge
             }
         }
     }
+    {% end %}
 
     // 物理删除指定的记录
     _, err = s.Model(ctx).Unscoped().WhereIn("id", ids).Delete()
@@ -438,6 +451,7 @@ func (s *s{% .tableCaseCamelName %}) RealDelete(ctx context.Context, ids []{% ge
 {% if contains .generateMenus "recycle"  %}
 func (s *s{% .tableCaseCamelName %}) Recovery(ctx context.Context, ids []{% getModelColumnTypeFromColumName .columns "id" %}) (err error) {
     // 检查是否需要处理Level字段
+    {% if eq .table.Type "tree"  %}
     doObj := do.{% .tableCaseCamelName %}{}
     needCalculateLevel := utils.HasField(doObj, "Level")
 
@@ -462,6 +476,7 @@ func (s *s{% .tableCaseCamelName %}) Recovery(ctx context.Context, ids []{% getM
             }
         }
     }
+    {% end %}
 
     // 恢复指定的记录
     _, err = s.Model(ctx).Unscoped().WhereIn("id", ids).Update(g.Map{"deleted_at": nil})
@@ -477,6 +492,7 @@ func (s *s{% .tableCaseCamelName %}) ChangeStatus(ctx context.Context, id {% get
     if utils.IsError(err) {
         return err
     }
+    {% if eq .table.Type "tree"  %}
     doObj :=do.{% .tableCaseCamelName %}{}
     needCalculateLevel := utils.HasField(doObj, "Level")
     if utils.IsError(err) {
@@ -500,6 +516,7 @@ func (s *s{% .tableCaseCamelName %}) ChangeStatus(ctx context.Context, id {% get
             }
         }
     }
+    {% end %}
     return
 }
 {% end %}
