@@ -11,32 +11,33 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// SystemDeptDao is the data access object for table system_dept.
+// SystemDeptDao is the data access object for the table system_dept.
 type SystemDeptDao struct {
-	table   string            // table is the underlying table name of the DAO.
-	group   string            // group is the database configuration group name of current DAO.
-	columns SystemDeptColumns // columns contains all the column names of Table for convenient usage.
+	table    string             // table is the underlying table name of the DAO.
+	group    string             // group is the database configuration group name of the current DAO.
+	columns  SystemDeptColumns  // columns contains all the column names of Table for convenient usage.
+	handlers []gdb.ModelHandler // handlers for customized model modification.
 }
 
-// SystemDeptColumns defines and stores column names for table system_dept.
+// SystemDeptColumns defines and stores column names for the table system_dept.
 type SystemDeptColumns struct {
-	Id        string // 主键
-	ParentId  string // 父ID
-	Level     string // 组级集合
-	Name      string // 部门名称
-	Leader    string // 负责人
-	Phone     string // 联系电话
-	Status    string // 状态 (1正常 2停用)
-	Sort      string // 排序
-	CreatedBy string // 创建者
-	UpdatedBy string // 更新者
-	CreatedAt string // 创建时间
-	UpdatedAt string // 更新时间
-	DeletedAt string // 删除时间
-	Remark    string // 备注
+	Id        string //
+	ParentId  string //
+	Level     string //
+	Name      string //
+	Leader    string //
+	Phone     string //
+	Status    string //
+	Sort      string //
+	CreatedBy string //
+	UpdatedBy string //
+	CreatedAt string //
+	UpdatedAt string //
+	DeletedAt string //
+	Remark    string //
 }
 
-// systemDeptColumns holds the columns for table system_dept.
+// systemDeptColumns holds the columns for the table system_dept.
 var systemDeptColumns = SystemDeptColumns{
 	Id:        "id",
 	ParentId:  "parent_id",
@@ -55,44 +56,49 @@ var systemDeptColumns = SystemDeptColumns{
 }
 
 // NewSystemDeptDao creates and returns a new DAO object for table data access.
-func NewSystemDeptDao() *SystemDeptDao {
+func NewSystemDeptDao(handlers ...gdb.ModelHandler) *SystemDeptDao {
 	return &SystemDeptDao{
-		group:   "default",
-		table:   "system_dept",
-		columns: systemDeptColumns,
+		group:    "default",
+		table:    "system_dept",
+		columns:  systemDeptColumns,
+		handlers: handlers,
 	}
 }
 
-// DB retrieves and returns the underlying raw database management object of current DAO.
+// DB retrieves and returns the underlying raw database management object of the current DAO.
 func (dao *SystemDeptDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
-// Table returns the table name of current dao.
+// Table returns the table name of the current DAO.
 func (dao *SystemDeptDao) Table() string {
 	return dao.table
 }
 
-// Columns returns all column names of current dao.
+// Columns returns all column names of the current DAO.
 func (dao *SystemDeptDao) Columns() SystemDeptColumns {
 	return dao.columns
 }
 
-// Group returns the configuration group name of database of current dao.
+// Group returns the database configuration group name of the current DAO.
 func (dao *SystemDeptDao) Group() string {
 	return dao.group
 }
 
-// Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
+// Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *SystemDeptDao) Ctx(ctx context.Context) *gdb.Model {
-	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
+	model := dao.DB().Model(dao.table)
+	for _, handler := range dao.handlers {
+		model = handler(model)
+	}
+	return model.Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.
-// It rollbacks the transaction and returns the error from function f if it returns non-nil error.
+// It rolls back the transaction and returns the error if function f returns a non-nil error.
 // It commits the transaction and returns nil if function f returns nil.
 //
-// Note that, you should not Commit or Rollback the transaction in function f
+// Note: Do not commit or roll back the transaction in function f,
 // as it is automatically handled by this function.
 func (dao *SystemDeptDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)

@@ -76,6 +76,7 @@ func (s *sToken) GetToken(ctx context.Context, scene string, claimsData map[stri
 
 func (s *sToken) ParseToken(ctx context.Context, token string) (*model.NormalIdentity, error) {
 	secretKey := config.GetConfigString(ctx, "token.secretKey", defaultSecretKey)
+	fmt.Println(secretKey)
 	tokenObj, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(secretKey), nil
 	})

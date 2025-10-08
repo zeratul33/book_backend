@@ -143,7 +143,7 @@ go run main.go module:create -name 模块名称
 5. 生成代码，解压，把模块名字的文件夹复制到modules下，vue的文件下下面会有api和views两个文件夹，复制到web/admin/src下,然后执行sql文件夹里面以up.sql为结尾的sql脚本
 6. 生成dao和service，在hack/hack.mk里面的service命令里面，新增如下语句
 ```
-@gf gen service -s=modules/novel_mall/logic -d=modules/novel_mall/service
+@gf gen service -s=modules/模块名称/logic -d=modules/模块名称/service
 ```
 - 然后再终端执行
 ```shell

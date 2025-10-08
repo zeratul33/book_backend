@@ -11,37 +11,38 @@ import (
 	"github.com/gogf/gf/v2/frame/g"
 )
 
-// SystemMenuDao is the data access object for table system_menu.
+// SystemMenuDao is the data access object for the table system_menu.
 type SystemMenuDao struct {
-	table   string            // table is the underlying table name of the DAO.
-	group   string            // group is the database configuration group name of current DAO.
-	columns SystemMenuColumns // columns contains all the column names of Table for convenient usage.
+	table    string             // table is the underlying table name of the DAO.
+	group    string             // group is the database configuration group name of the current DAO.
+	columns  SystemMenuColumns  // columns contains all the column names of Table for convenient usage.
+	handlers []gdb.ModelHandler // handlers for customized model modification.
 }
 
-// SystemMenuColumns defines and stores column names for table system_menu.
+// SystemMenuColumns defines and stores column names for the table system_menu.
 type SystemMenuColumns struct {
-	Id        string // 主键
-	ParentId  string // 父ID
-	Level     string // 组级集合
-	Name      string // 菜单名称
-	Code      string // 菜单标识代码
-	Icon      string // 菜单图标
-	Route     string // 路由地址
-	Component string // 组件路径
-	Redirect  string // 跳转地址
-	IsHidden  string // 是否隐藏 (1是 2否)
-	Type      string // 菜单类型, (M菜单 B按钮 L链接 I iframe)
-	Status    string // 状态 (1正常 2停用)
-	Sort      string // 排序
-	CreatedBy string // 创建者
-	UpdatedBy string // 更新者
+	Id        string //
+	ParentId  string //
+	Level     string //
+	Name      string //
+	Code      string //
+	Icon      string //
+	Route     string //
+	Component string //
+	Redirect  string //
+	IsHidden  string //
+	Type      string //
+	Status    string //
+	Sort      string //
+	CreatedBy string //
+	UpdatedBy string //
 	CreatedAt string //
 	UpdatedAt string //
-	DeletedAt string // 删除时间
-	Remark    string // 备注
+	DeletedAt string //
+	Remark    string //
 }
 
-// systemMenuColumns holds the columns for table system_menu.
+// systemMenuColumns holds the columns for the table system_menu.
 var systemMenuColumns = SystemMenuColumns{
 	Id:        "id",
 	ParentId:  "parent_id",
@@ -65,44 +66,49 @@ var systemMenuColumns = SystemMenuColumns{
 }
 
 // NewSystemMenuDao creates and returns a new DAO object for table data access.
-func NewSystemMenuDao() *SystemMenuDao {
+func NewSystemMenuDao(handlers ...gdb.ModelHandler) *SystemMenuDao {
 	return &SystemMenuDao{
-		group:   "default",
-		table:   "system_menu",
-		columns: systemMenuColumns,
+		group:    "default",
+		table:    "system_menu",
+		columns:  systemMenuColumns,
+		handlers: handlers,
 	}
 }
 
-// DB retrieves and returns the underlying raw database management object of current DAO.
+// DB retrieves and returns the underlying raw database management object of the current DAO.
 func (dao *SystemMenuDao) DB() gdb.DB {
 	return g.DB(dao.group)
 }
 
-// Table returns the table name of current dao.
+// Table returns the table name of the current DAO.
 func (dao *SystemMenuDao) Table() string {
 	return dao.table
 }
 
-// Columns returns all column names of current dao.
+// Columns returns all column names of the current DAO.
 func (dao *SystemMenuDao) Columns() SystemMenuColumns {
 	return dao.columns
 }
 
-// Group returns the configuration group name of database of current dao.
+// Group returns the database configuration group name of the current DAO.
 func (dao *SystemMenuDao) Group() string {
 	return dao.group
 }
 
-// Ctx creates and returns the Model for current DAO, It automatically sets the context for current operation.
+// Ctx creates and returns a Model for the current DAO. It automatically sets the context for the current operation.
 func (dao *SystemMenuDao) Ctx(ctx context.Context) *gdb.Model {
-	return dao.DB().Model(dao.table).Safe().Ctx(ctx)
+	model := dao.DB().Model(dao.table)
+	for _, handler := range dao.handlers {
+		model = handler(model)
+	}
+	return model.Safe().Ctx(ctx)
 }
 
 // Transaction wraps the transaction logic using function f.
-// It rollbacks the transaction and returns the error from function f if it returns non-nil error.
+// It rolls back the transaction and returns the error if function f returns a non-nil error.
 // It commits the transaction and returns nil if function f returns nil.
 //
-// Note that, you should not Commit or Rollback the transaction in function f
+// Note: Do not commit or roll back the transaction in function f,
 // as it is automatically handled by this function.
 func (dao *SystemMenuDao) Transaction(ctx context.Context, f func(ctx context.Context, tx gdb.TX) error) (err error) {
 	return dao.Ctx(ctx).Transaction(ctx, f)
